@@ -24,7 +24,11 @@
       { "transform": "typescript-transform-paths", "afterDeclarations": true }
     ],
     "paths": {
-      "@/root/*": ["src/*"]
+      "@/root/*": ["src/*"],
+      "@/global/*": ["src/shared/global/*"],
+      "@/services/*": ["src/shared/services/*"],
+      "@/sockets/*": ["src/shared/sockets/*"],
+      "@/workers/*": ["src/shared/workers/*"]
     }
   }
 }

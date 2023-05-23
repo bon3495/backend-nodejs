@@ -1,5 +1,5 @@
 import { Server as HttpServer } from 'http';
-// import { createAdapter } from '@socket.io/redis-adapter';
+import { createAdapter } from '@socket.io/redis-adapter';
 import type Logger from 'bunyan';
 import compression from 'compression';
 import cookieSession from 'cookie-session';
@@ -15,9 +15,8 @@ import {
 import helmet from 'helmet';
 import hpp from 'hpp';
 import HTTP_STATUS from 'http-status-codes';
-
-// import { createClient } from 'redis';
-// import { Server as SocketServer } from 'socket.io';
+import { createClient } from 'redis';
+import { Server as SocketServer } from 'socket.io';
 
 import 'express-async-errors';
 import { config } from '@/root/config';
@@ -101,30 +100,30 @@ export class RootServer {
   private async startServer(app: Application): Promise<void> {
     try {
       const httpServer: HttpServer = new HttpServer(app);
-      // const socketIO = await this.createSocketIO(httpServer);
+      const socketIO = await this.createSocketIO(httpServer);
       this.startHttpServer(httpServer);
-      // this.socketIOConnections(socketIO);
+      this.socketIOConnections(socketIO);
     } catch (error) {
       log.error(error);
     }
   }
 
-  // private async createSocketIO(httpServer: HttpServer): Promise<SocketServer> {
-  //   const io: SocketServer = new SocketServer(httpServer, {
-  //     cors: {
-  //       origin: config.CLIENT_URL,
-  //       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  //     },
-  //   });
+  private async createSocketIO(httpServer: HttpServer): Promise<SocketServer> {
+    const io: SocketServer = new SocketServer(httpServer, {
+      cors: {
+        origin: config.CLIENT_URL,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+      },
+    });
 
-  //   const pubClient = createClient({ url: config.REDIS_HOST });
-  //   const subClient = pubClient.duplicate();
+    const pubClient = createClient({ url: config.REDIS_HOST });
+    const subClient = pubClient.duplicate();
 
-  //   await Promise.all([pubClient.connect(), subClient.connect()]);
-  //   io.adapter(createAdapter(pubClient, subClient));
+    await Promise.all([pubClient.connect(), subClient.connect()]);
+    io.adapter(createAdapter(pubClient, subClient));
 
-  //   return io;
-  // }
+    return io;
+  }
 
   private startHttpServer(httpServer: HttpServer): void {
     httpServer.listen(SERVER_PORT, async () => {
@@ -132,7 +131,8 @@ export class RootServer {
     });
   }
 
-  // private socketIOConnections(io: SocketServer): void {
-  //   console.log('socketIOConnections');
-  // }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private socketIOConnections(io: SocketServer): void {
+    log.info('socketIOConnections');
+  }
 }
