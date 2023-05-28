@@ -67,7 +67,16 @@ export class ServerError extends CustomError {
 }
 
 export class ZodValidateError extends CustomError {
-  statusCode = HTTP_STATUS.BAD_REQUEST;
+  statusCode = HTTP_STATUS.UNPROCESSABLE_ENTITY;
+  status = 'error';
+
+  constructor(message: string) {
+    super(message);
+  }
+}
+
+export class InternetServerError extends CustomError {
+  statusCode = HTTP_STATUS.INTERNAL_SERVER_ERROR;
   status = 'error';
 
   constructor(message: string) {
