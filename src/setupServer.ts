@@ -77,13 +77,14 @@ export class RootServer {
     app.all('*', (req: Request, res: Response): void => {
       res.status(HTTP_STATUS.NOT_FOUND).json({
         message: `${req.originalUrl} not found.`,
+        status: HTTP_STATUS.NOT_FOUND,
       });
     });
 
     app.use(
       (
         error: IErrorResponse,
-        req: Request,
+        _: Request,
         res: Response,
         next: NextFunction
       ) => {
