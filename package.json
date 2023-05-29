@@ -15,12 +15,12 @@
   "keywords": [],
   "author": "bontran",
   "dependencies": {
+    "@bull-board/api": "^5.2.0",
     "@bull-board/express": "^5.2.0",
     "@socket.io/redis-adapter": "^8.2.1",
     "axios": "^1.4.0",
     "bcryptjs": "^2.4.3",
     "bull": "^4.10.4",
-    "bullmq": "^3.14.0",
     "bunyan": "^1.8.15",
     "cloudinary": "^1.37.0",
     "compression": "^1.7.4",

@@ -4,6 +4,10 @@ import { AuthModel } from '@/auth/model/auth.model';
 import { IAuthDocument } from '@/auth/types';
 
 class AuthServices {
+  public async createAuthUser(data: IAuthDocument): Promise<void> {
+    await AuthModel.create(data);
+  }
+
   public async getUserByUserNameOrEmail({
     username,
     email,

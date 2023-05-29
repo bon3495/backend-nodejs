@@ -22,9 +22,9 @@ import 'express-async-errors';
 import { config } from '@/root/config';
 import { CustomError, IErrorResponse } from '@/root/errorsHandler';
 import routes from '@/root/routes';
+import { GLOBAL, SERVER_PORT } from '@/global/constant';
 
-const SERVER_PORT = 5000;
-const log: Logger = config.createLogger('rootServer');
+const log: Logger = config.createLogger(GLOBAL.ROOT_SERVER);
 
 export class RootServer {
   private app: Application;

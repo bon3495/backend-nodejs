@@ -8,7 +8,7 @@ export interface IUserDocument extends Document {
   email?: string;
   password?: string;
   avatarColor?: string;
-  uId: string;
+  uId?: string;
   postsCount: number;
   work: string;
   school: string;
@@ -76,14 +76,14 @@ export interface IUserJobInfo {
   value?: string | ISocialLinks;
 }
 
-export interface IUserJob {
-  keyOne?: string;
-  keyTwo?: string;
-  key?: string;
-  value?: string | INotificationSettings | IUserDocument;
-}
-
 export interface IAllUsers {
   users: IUserDocument[];
   totalUsers: number;
 }
+
+export type IUserJob = {
+  keyOne?: string;
+  keyTwo?: string;
+  key?: string;
+  value?: string | INotificationSettings | IUserDocument;
+};
