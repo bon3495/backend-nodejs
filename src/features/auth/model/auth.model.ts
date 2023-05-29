@@ -2,7 +2,7 @@ import { compare, hash } from 'bcryptjs';
 import { Model, model, Schema } from 'mongoose';
 
 import { SALT_ROUND } from '@/global/constant';
-import { IAuthDocument } from '@/auth/interfaces';
+import { IAuthDocument } from '@/auth/types';
 
 const authSchema: Schema = new Schema<IAuthDocument>(
   {

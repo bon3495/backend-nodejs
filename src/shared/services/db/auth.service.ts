@@ -1,7 +1,7 @@
 import { QueryOptions } from 'mongoose';
 
-import { IAuthDocument } from '@/auth/interfaces';
 import { AuthModel } from '@/auth/model/auth.model';
+import { IAuthDocument } from '@/auth/types';
 
 class AuthServices {
   public async getUserByUserNameOrEmail({
