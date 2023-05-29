@@ -2,9 +2,10 @@ import Logger from 'bunyan';
 import mongoose from 'mongoose';
 
 import { config } from '@/root/config';
+import { GLOBAL } from '@/global/constant';
 import { redisConnection } from '@/services/redis/redis.connection';
 
-const log: Logger = config.createLogger('setupDatabase');
+const log: Logger = config.createLogger(GLOBAL.SETUP_DATABASE);
 
 export default () => {
   const connect = () => {

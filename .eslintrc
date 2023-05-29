@@ -8,8 +8,8 @@
     "prettier"
   ],
   "parserOptions": {
-    "ecmaVersion": 2020, // Allows for the parsing of modern ECMAScript features
-    "sourceType": "module" // Allows for the use of imports
+    "ecmaVersion": 2020,
+    "sourceType": "module"
   },
   "rules": {
     "semi": [2, "always"],
@@ -19,12 +19,9 @@
     ],
     "camelcase": 0,
     "no-return-assign": 0,
-    "quotes": ["warning", "single"],
+    "quotes": ["error", "single"],
     "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/no-namespace": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off"
-  },
-  "env": {
-    "jest": true
   }
 }

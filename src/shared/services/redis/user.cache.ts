@@ -2,24 +2,27 @@ import Logger from 'bunyan';
 
 import { config } from '@/root/config';
 import { ServerError } from '@/root/errorsHandler';
+import { GLOBAL } from '@/global/constant';
 import { BaseCache } from '@/services/redis/base.cache';
 import { IUserDocument } from '@/users/types';
 
 interface IUserCacheInput {
   key: string;
   createdUser: IUserDocument;
+  userUid: string;
 }
 
-const log: Logger = config.createLogger('userCache');
+const log: Logger = config.createLogger(GLOBAL.USER_CACHE);
 
 export class UserCache extends BaseCache {
   constructor() {
-    super('userCache');
+    super(GLOBAL.USER_CACHE);
   }
 
   public async saveUserToCache({
     key,
     createdUser,
+    userUid,
   }: IUserCacheInput): Promise<void> {
     const {
       _id,
@@ -71,7 +74,7 @@ export class UserCache extends BaseCache {
       if (!this.client.isOpen) {
         await this.client.connect();
       }
-      this.client.ZADD('users', { score: Number(uId), value: key });
+      this.client.ZADD('users', { score: Number(userUid), value: key });
 
       for (const [itemKey, itemValue] of Object.entries(dataToSave)) {
         await this.client.HSET(`users:${key}`, itemKey, itemValue);
