@@ -9,11 +9,15 @@ import { zodValidation } from '@/global/decorators/zodValidation';
 import { cloudinaryUploads } from '@/global/helpers/cloudinaryUpload';
 import { Helpers } from '@/global/helpers/utils';
 import { authServices } from '@/services/db/auth.service';
-import { IAuthDocument, ISignUpData } from '@/auth/interfaces';
+import { UserCache } from '@/services/redis/user.cache';
 import {
   SignUpValidate,
   TSignUpValidate,
 } from '@/auth/schemas/signup.validate';
+import { IAuthDocument, ISignUpData } from '@/auth/types';
+import { IUserDocument } from '@/users/types';
+
+const userCache: UserCache = new UserCache();
 
 export class SignUp {
   @zodValidation(SignUpValidate)
@@ -35,7 +39,7 @@ export class SignUp {
 
     const authObjectId: ObjectId = new ObjectId();
     const userObjectId: ObjectId = new ObjectId();
-    const uId: string = `${Helpers.generateRandomNumber(RANDOM_NUMBER)}`;
+    const uId: string = Helpers.generateRandomNumber(RANDOM_NUMBER);
 
     const authData: IAuthDocument = SignUp.prototype.signupData({
       _id: authObjectId,
@@ -46,16 +50,27 @@ export class SignUp {
       username,
     });
 
-    const result: UploadApiResponse = (await cloudinaryUploads(
+    const uploadResult: UploadApiResponse = (await cloudinaryUploads(
       avatarImage,
       `${userObjectId}`,
       true,
       true
     )) as UploadApiResponse;
 
-    if (!result.public_id) {
+    if (!uploadResult.public_id) {
       throw new BadRequestError('File upload: Error occured. Try again.');
     }
+
+    /**
+     * Add to redis cache
+     */
+    const userDataForCache = SignUp.prototype.userData(authData, userObjectId);
+    userDataForCache.profilePicture = uploadResult.secure_url;
+
+    userCache.saveUserToCache({
+      key: `${userObjectId}`,
+      createdUser: userDataForCache,
+    });
 
     res.status(HTTP_STATUS.OK).json({
       status: HTTP_STATUS.OK,
@@ -76,5 +91,45 @@ export class SignUp {
       username,
       createdAt: new Date(),
     } as IAuthDocument;
+  }
+
+  private userData(data: IAuthDocument, userObjectId: ObjectId): IUserDocument {
+    const { _id, username, email, uId, password, avatarColor, createdAt } =
+      data;
+
+    return {
+      _id: userObjectId,
+      authId: _id,
+      username,
+      email,
+      password,
+      avatarColor,
+      uId,
+      createdAt: createdAt.toISOString(),
+      postsCount: 0,
+      work: '',
+      school: '',
+      quote: '',
+      location: '',
+      blocked: [],
+      blockedBy: [],
+      followersCount: 0,
+      followingCount: 0,
+      notifications: {
+        messages: true,
+        reactions: true,
+        comments: true,
+        follows: true,
+      },
+      social: {
+        facebook: '',
+        instagram: '',
+        twitter: '',
+        youtube: '',
+      },
+      bgImageVersion: '',
+      bgImageId: '',
+      profilePicture: '',
+    } as unknown as IUserDocument;
   }
 }
