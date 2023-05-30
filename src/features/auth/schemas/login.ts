@@ -1,7 +1,8 @@
-import { USER_NAME_MAX_LENGTH, USER_NAME_MIN_LENGTH } from '@/global/constant';
 import { z } from 'zod';
 
-export const SignInValidate = z.object({
+import { USER_NAME_MAX_LENGTH, USER_NAME_MIN_LENGTH } from '@/global/constant';
+
+export const LogInValidate = z.object({
   username: z
     .string({
       required_error: 'Username is a required field',
@@ -29,4 +30,4 @@ export const SignInValidate = z.object({
     }),
 });
 
-export type signInValidate = z.infer<typeof SignInValidate>;
+export type TLogInValidate = z.infer<typeof LogInValidate>;

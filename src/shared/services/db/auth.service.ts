@@ -16,7 +16,10 @@ class AuthServices {
     email?: string;
   }): Promise<IAuthDocument | null> {
     const query: QueryOptions = {
-      $or: [{ username }, { email }],
+      $or: [
+        { username: username?.toLowerCase() },
+        { email: email?.toLowerCase() },
+      ],
     };
 
     const user: IAuthDocument | null = await AuthModel.findOne(query).exec();
