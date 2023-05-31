@@ -3,6 +3,7 @@ import Logger from 'bunyan';
 import { config } from '@/root/config';
 import { ServerError } from '@/root/errorsHandler';
 import { GLOBAL } from '@/global/constant';
+import { Helpers } from '@/global/helpers/utils';
 import { BaseCache } from '@/services/redis/base.cache';
 import { IUserDocument } from '@/users/types';
 
@@ -82,6 +83,45 @@ export class UserCache extends BaseCache {
     } catch (error) {
       log.error(error);
       throw new ServerError('Server error. Try again.');
+    }
+  }
+
+  public async getUserFromCache(userId: string): Promise<IUserDocument> {
+    try {
+      if (!this.client.isOpen) {
+        this.client.connect();
+      }
+
+      const userResponse = (await this.client.HGETALL(
+        `users:${userId}`
+      )) as Record<keyof IUserDocument, string>;
+
+      return {
+        _id: userResponse._id,
+        authId: userResponse.authId,
+        username: userResponse.username,
+        email: userResponse.email,
+        avatarColor: userResponse.avatarColor,
+        uId: userResponse.uId,
+        postsCount: Helpers.parseJSON<number>(userResponse.postsCount),
+        work: userResponse.work,
+        school: userResponse.school,
+        quote: userResponse.quote,
+        location: userResponse.location,
+        blocked: Helpers.parseJSON(userResponse.blocked),
+        blockedBy: Helpers.parseJSON(userResponse.blockedBy),
+        followersCount: Helpers.parseJSON(userResponse.followersCount),
+        followingCount: Helpers.parseJSON(userResponse.followingCount),
+        notifications: Helpers.parseJSON(userResponse.notifications),
+        social: Helpers.parseJSON(userResponse.social),
+        bgImageVersion: userResponse.bgImageVersion,
+        bgImageId: userResponse.bgImageId,
+        profilePicture: userResponse.profilePicture,
+        createdAt: userResponse.createdAt,
+      } as IUserDocument;
+    } catch (error) {
+      log.error(error);
+      throw new ServerError('Server error. Try again!');
     }
   }
 }

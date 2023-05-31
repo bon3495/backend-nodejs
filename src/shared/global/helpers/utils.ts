@@ -1,3 +1,7 @@
+import JWT from 'jsonwebtoken';
+
+import { IAuthPayload } from '@/auth/types';
+
 export class Helpers {
   static generateRandomNumber(integerLength: number): string {
     const characters = '123456789';
@@ -8,5 +12,23 @@ export class Helpers {
     }
 
     return result;
+  }
+
+  static convertToLowerCase(str: string): string {
+    return str.toLowerCase();
+  }
+
+  static parseJSON<TType>(prop: string): TType {
+    return JSON.parse(prop);
+  }
+
+  static signJWT(
+    object: IAuthPayload,
+    keyName: string,
+    options?: JWT.SignOptions
+  ): string {
+    return JWT.sign(object, keyName, {
+      ...(options && options),
+    });
   }
 }
