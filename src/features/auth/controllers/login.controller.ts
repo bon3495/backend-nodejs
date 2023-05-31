@@ -1,13 +1,18 @@
 import { Request, Response } from 'express';
 import HTTP_STATUS from 'http-status-codes';
-import JWT from 'jsonwebtoken';
 
 import { config } from '@/root/config';
 import { BadRequestError } from '@/root/errorsHandler';
+import { ACCESS_TOKEM_EXPIRES, REFRESH_TOKEM_EXPIRES } from '@/global/constant';
 import { zodValidation } from '@/global/decorators/zodValidation';
+import { Helpers } from '@/global/helpers/utils';
 import { authServices } from '@/services/db/auth.service';
 import { userService } from '@/services/db/user.service';
-import { LogInValidate, TLogInValidate } from '@/auth/schemas/login';
+import { AuthCache } from '@/services/redis/auth.cache';
+import { LogInValidate, TLogInValidate } from '@/auth/schemas/login.validate';
+import { IAuthPayload } from '@/auth/types';
+
+const authCache: AuthCache = new AuthCache();
 
 export class LogIn {
   @zodValidation(LogInValidate)
@@ -31,18 +36,32 @@ export class LogIn {
 
     const user = await userService.getUserByAuthId(`${existingAuthUser._id}`);
 
-    const userJWT = JWT.sign(
+    const payloadJWT: IAuthPayload = {
+      userId: `${user._id}`,
+      username: existingAuthUser.username,
+      email: existingAuthUser.email,
+      uId: existingAuthUser.uId,
+      avatarColor: existingAuthUser.avatarColor,
+    };
+
+    const accessToken = Helpers.signJWT(payloadJWT, config.JWT_TOKEN!, {
+      expiresIn: ACCESS_TOKEM_EXPIRES,
+    });
+
+    const refreshToken = Helpers.signJWT(
+      payloadJWT,
+      config.JWT_TOKEN_REFRESH!,
       {
-        userId: user._id,
-        username: existingAuthUser.username,
-        email: existingAuthUser.email,
-        uId: existingAuthUser.uId,
-        avatarColor: existingAuthUser.avatarColor,
-      },
-      config.JWT_TOKEN!
+        expiresIn: REFRESH_TOKEM_EXPIRES,
+      }
     );
 
-    req.session = { jwt: userJWT };
+    // Save the refresh token into Redis
+    await authCache.saveRefreshTokenToCache({
+      userId: `${user._id}`,
+      token: refreshToken,
+      options: { EX: REFRESH_TOKEM_EXPIRES },
+    });
 
     res.status(HTTP_STATUS.OK).json({
       status: HTTP_STATUS.OK,
@@ -50,7 +69,7 @@ export class LogIn {
       data: {
         user,
       },
-      token: userJWT,
+      token: { accessToken, refreshToken },
     });
   }
 }

@@ -1,10 +1,8 @@
 import type { UploadApiResponse } from 'cloudinary';
 import type { Request, Response } from 'express';
 import HTTP_STATUS from 'http-status-codes';
-import JWT from 'jsonwebtoken';
 import { ObjectId } from 'mongodb';
 
-import { config } from '@/root/config';
 import { BadRequestError } from '@/root/errorsHandler';
 import { QUEUES, RANDOM_NUMBER } from '@/global/constant';
 import { zodValidation } from '@/global/decorators/zodValidation';
@@ -84,28 +82,10 @@ export class SignUp {
     authQueue.addAuthUserJob(QUEUES.ADD_AUTH_USER_JOB, { value: authData });
     userQueue.addUserJob(QUEUES.ADD_USER_JOB, { value: userDataForCache });
 
-    const userJWT: string = SignUp.prototype.signToken(authData, userObjectId);
-    req.session = { jwt: userJWT };
-
     res.status(HTTP_STATUS.OK).json({
       status: HTTP_STATUS.OK,
-      data: { user: authData },
       message: 'User created successfully',
-      token: userJWT,
     });
-  }
-
-  private signToken(data: IAuthDocument, userId: ObjectId): string {
-    return JWT.sign(
-      {
-        userId,
-        username: data.username,
-        email: data.email,
-        avatarColor: data.avatarColor,
-        uId: data.uId,
-      },
-      config.JWT_TOKEN || ''
-    );
   }
 
   private signupData(data: ISignUpData): IAuthDocument {
